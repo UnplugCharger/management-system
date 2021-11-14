@@ -8,6 +8,8 @@ A restourant management system
 2. Writting Crud operations with Golang
 3. Using mongodb for Golang backends
 4. JWT- token authentication implementation in go
+5. Deploying Go applications on EC2 Instance
+6. Configuring CI/CD pipelines
 
 ## Folder Structure
 

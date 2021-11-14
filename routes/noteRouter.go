@@ -1,6 +1,0 @@
-package routes
-
-
-func NoteRoutes()  {
-	
-}

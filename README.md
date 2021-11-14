@@ -1,4 +1,4 @@
-# Restourant Management system
+# Restaurant Management system
 
 A restourant management system
 
@@ -16,7 +16,7 @@ A restourant management system
 1. controllers
 2. database
 3. middleware
-4. models
+4. database models
 5. routes
 6. helpers
 

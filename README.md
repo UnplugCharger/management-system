@@ -16,3 +16,5 @@ A restourant management system
 3. middleware
 4. models
 5. routes
+
+This project structure that I am using is the MVC structure

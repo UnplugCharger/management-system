@@ -1,9 +1,22 @@
 package controllers
 
-import "github.com/gin-gonic/gin"
+import (
+	"context"
+
+	"github.com/byron/rest/database"
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+
+var menuCollection *mongo.Collection= database.OpenCollection(database.Client,"menu")
 
 func GetMenus() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		result, err := menuCollection.Find(context.TODO(),bson.M{})
+		defer cancel()
+	}
 }
 
 func GetMenu() gin.HandlerFunc {

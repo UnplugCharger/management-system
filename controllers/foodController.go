@@ -3,7 +3,9 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -56,7 +58,7 @@ func GetFoods() gin.HandlerFunc {
 		defer cancel()
 
 		if err != nil {
-			msg := "Error Ocurred while listing foods"
+			msg := "Error Occurred while listing foods"
 			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
 		}
 		var allFoods []bson.M
@@ -99,7 +101,7 @@ func CreateFood() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
 			return
 		}
-		err := menuCollection.FindOne(ctx, bson.M{"menu_id": food.Menu_id}).Decode(&menu)
+		err := menuCollection.FindOne(ctx, bson.M{"menu_id": food.MenuId}).Decode(&menu)
 		defer cancel()
 
 		if err != nil {
@@ -108,10 +110,10 @@ func CreateFood() gin.HandlerFunc {
 			return
 
 		}
-		food.Created_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
-		food.Updated_at, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		food.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		food.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 		food.ID = primitive.NewObjectID()
-		food.Food_id = food.ID.Hex()
+		food.FoodId = food.ID.Hex()
 		var num = toFix(*food.Price, 2)
 		food.Price = &num
 
@@ -127,13 +129,70 @@ func CreateFood() gin.HandlerFunc {
 }
 
 func UpdateFood() gin.HandlerFunc {
-	return func(c *gin.Context) {}
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var menu models.Menu
+		var food models.Food
+
+		foodId := c.Param("food_id")
+
+		if err := c.BindJSON(&food); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		var updateObj primitive.D
+
+		if food.Name != nil {
+			updateObj = append(updateObj, bson.E{"name", food.Name})
+		}
+		if food.Price != nil {
+			updateObj = append(updateObj, bson.E{"price", food.Price})
+		}
+		if food.FoodImage != nil {
+			updateObj = append(updateObj, bson.E{"food_image", food.FoodImage})
+		}
+		if food.MenuId != nil {
+			err := menuCollection.FindOne(ctx, bson.M{"menu_id": food.MenuId}).Decode(&menu)
+			defer cancel()
+			if err != nil {
+				msg := fmt.Sprintf("message : Menu not found")
+				c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+				return
+			}
+			updateObj = append(updateObj, bson.E{"menu", food.Price})
+
+		}
+		food.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+		updateObj = append(updateObj, bson.E{"updated_at", food.UpdatedAt})
+
+		upsert := true
+		filter := bson.M{"food_id": foodId}
+
+		opt := options.UpdateOptions{
+			Upsert: &upsert,
+		}
+		results, err := foodCollection.UpdateOne(
+			ctx,
+			filter,
+			bson.D{
+				{"$set", updateObj},
+			},
+			&opt,
+		)
+		if err != nil {
+			msg := fmt.Sprintf("food item update failed")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
+			return
+		}
+		c.JSON(http.StatusOK, results)
+	}
 }
 
 func round(num float64) int {
-
+	return int(num + math.Copysign(0.5, num))
 }
 
 func toFix(num float64, precission int) float64 {
-
+	output := math.Pow(10, float64(precission))
+	return float64(round(num*output)) / output
 }

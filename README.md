@@ -1,11 +1,11 @@
 # Restaurant Management system
 
-A restourant management system
+A restaurant management system
 
 ## Learning Objectives
 
 1. General Golang project structure
-2. Writting Crud operations with Golang
+2. Writing Crud operations with Golang
 3. Using mongodb for Golang backends
 4. JWT- token authentication implementation in go
 5. Deploying Go applications on EC2 Instance

@@ -10,8 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-
-
 func DBinstance() *mongo.Client {
 	MongoDb := "mongodb://localhost:27017"
 
@@ -24,18 +22,21 @@ func DBinstance() *mongo.Client {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 
 	defer cancel()
-   err = client.Connect(ctx)
+	err = client.Connect(ctx)
 
-   if err != nil{log.Fatal(err)}
+	if err != nil {
+		log.Fatal(err)
+	}
 
-   fmt.Println("connected to mongo db")
+	fmt.Println("connected to mongo db")
 
-   return client
+	return client
 }
+
 var Client *mongo.Client = DBinstance()
 
-func OpenCollection(client *mongo.Client , collectionName string ) *mongo.Collection{
- var collection *mongo.Collection = client.Database("restaurant").Collection(collectionName)
+func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	var collection *mongo.Collection = client.Database("restaurant").Collection(collectionName)
 
- return collection
+	return collection
 }

@@ -61,7 +61,7 @@ func UpdateOrder() gin.HandlerFunc {
 			return
 		}
 		if order.Table_id != nil {
-			err := menuCollection.FindOne(ctx)
+			err := menuCollection.FindOne(orderId)
 		}
 	}
 }

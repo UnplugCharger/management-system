@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"github.com/byron/rest/database"
+	"github.com/byron/rest/models"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -42,7 +43,21 @@ func GetInvoices() gin.HandlerFunc {
 
 func GetInvoice() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var ctx , cancel := context.WithTimeout(context.Background(),100*time.Second)
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		invoiceId := c.Param("invoice_id")
+
+		var invoice models.Invoice
+
+		err := invoiceCollection.FindOne(ctx, bson.M{"invoice_id": invoiceId}).Decode(&invoice)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "error occurred while listing invoice item"})
+		}
+		var invoiceView InvoiceViewFormat
+
+		allOrderItems, err := ItemsByOrder(invoice.Order_id)
+
+		invoiceView.OrderId = invoice.Order_id
 	}
 }
 func CreateInvoice() gin.HandlerFunc {
